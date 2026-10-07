@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.jolpi.ca https://api.open-meteo.com https://www.formula1.com https://www.motorsport.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>积分榜 · F1 观赛助手</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+  <!-- 黑条一：站内导航（由 navHtml('standings', '../') 注入） -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="f1-logo" href="../index.html" aria-label="F1"><b>F1</b></a>
+      <nav class="topnav" id="topnav"></nav>
+      <div class="topbar-right">
+        <span class="topbar-chip" id="data-source">数据加载中</span>
+        <button type="button" class="topbar-btn" id="act-settings" aria-expanded="false" aria-controls="settings-pop">设置</button>
+      </div>
+    </div>
+    <div class="topbar-cuts" aria-hidden="true"></div>
+  </header>
+
+  <!-- 黑条二：当前分站 + 双时钟 -->
+  <div class="subbar">
+    <div class="subbar-inner">
+      <div class="subbar-race">
+        <span class="sub-round" id="sub-round">R--</span>
+        <span class="sub-date" id="sub-date">-- – -- ---</span>
+        <span class="sub-name"><span class="flag-badge" id="sub-flag">--</span><span id="sub-name">载入中</span></span>
+      </div>
+      <div class="clocks">
+        <div class="clock">
+          <span class="clock-dot" aria-hidden="true"></span>
+          <span class="clock-label">MY TIME</span>
+          <span class="clock-time" id="clock-local">--:--</span>
+        </div>
+        <div class="clock">
+          <span class="clock-label">TRACK TIME</span>
+          <span class="clock-time" id="clock-track">--:--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="page-head">
+      <h1 class="display">2026 车手与车队积分榜</h1>
+      <div class="page-head-actions">
+        <button class="pill-btn pill-btn-red" id="act-refresh">刷新数据</button>
+      </div>
+    </div>
+
+    <!-- 概览：截至站次 / 车手数 / 车队数 / 数据来源 -->
+    <section class="band">
+      <div class="band-head">
+        <h2 class="band-title">赛季概览</h2>
+        <span class="band-note" id="overview-note"></span>
+      </div>
+      <div id="overview-body">
+        <p class="state state-loading">加载中…</p>
+      </div>
+    </section>
+
+    <div class="split">
+      <div class="split-main">
+        <section class="card" id="standings">
+          <header class="card-head">
+            <h2 class="card-title">积分榜</h2>
+            <div class="seg" id="standings-seg">
+              <button class="seg-btn is-active" data-tab="drivers" aria-pressed="true">车手</button>
+              <button class="seg-btn" data-tab="constructors" aria-pressed="false">车队</button>
+            </div>
+          </header>
+          <div class="card-body">
+            <div id="standings-body">
+              <p class="state state-loading">积分榜加载中…</p>
+            </div>
+            <p class="block-note" id="standings-note"></p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="split-rail">
+        <div id="leaders-body">
+          <p class="state state-loading">加载中…</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="status-bar" id="status-bar"></div>
+  </footer>
+
+  <script type="module" src="../assets/js/pages/standings.js"></script>
+  <div class="settings-pop" id="settings-pop" hidden></div>
+</body>
+</html>

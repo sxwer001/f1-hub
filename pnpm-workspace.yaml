@@ -1,0 +1,17 @@
+# pnpm 11 起，依赖构建脚本白名单等设置从 package.json 迁移到这里。
+#
+# nodeLinker: hoisted
+#   pnpm 默认用符号链接组织 node_modules，而 electron-builder 在打包时需要遍历
+#   真实的目录树（它不能跨越 pnpm 的 symlink 布局）。改为扁平结构（npm 风格）
+#   可以让 electron-builder 正常工作。
+#
+# allowBuilds.electron
+#   electron 的 postinstall 负责把 Electron 二进制解包到 node_modules/electron/dist。
+#   本机网络对 Electron 下载源存在 TLS 证书问题，因此改为：
+#   ELECTRON_SKIP_BINARY_DOWNLOAD=1 安装 + 从本地缓存 zip 解包（见 tools/setup-electron.ps1）。
+nodeLinker: hoisted
+
+allowBuilds:
+  electron: true
+  electron-builder: true
+  esbuild: true

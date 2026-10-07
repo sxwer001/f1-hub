@@ -1,0 +1,1739 @@
+/* ==========================================================================
+   F1 观赛助手 —— 布局与组件
+   对齐 formula1.com 的实际呈现：
+     · 亮色为主：#f3f3f4 底、白色卡片、黑色顶栏/次栏、#e10600 强调
+     · 大字号全大写窄体标题；小字号全大写副标题
+     · 赛历卡片：ROUND NN + 日期胶囊 + 国旗国家名 + 领奖台行
+     · 下一站整卡红底 + 白色胶囊按钮
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+/* body 绝对不能设 height:100%：那会让 body 只有一屏高，而
+   `.topbar { position: sticky; top: 0 }` 是相对**包含块（body）**生效的 ——
+   body 一屏就到头，滚过一屏后 sticky 没有空间可粘，顶栏随页面滚走。
+   改用 min-height 让 body 随内容长高，sticky 才能全程生效。
+   （配合上面的 overflow-x: clip；`hidden` 会让 body 变滚动容器，同样破坏 sticky。） */
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  /* 必须是 clip 而非 hidden：`overflow-x: hidden` 会让 body 变成滚动容器，
+     于是 `.topbar { position: sticky; top: 0 }` 相对 body 的滚动口定位、随页面一起滚走
+     —— 表现就是「往下滚动后顶部状态栏消失」。`clip` 同样裁掉横向溢出，
+     但不创建滚动容器，sticky 因此保持有效。 */
+  overflow-x: clip;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+code {
+  font-family: var(--font-num);
+  font-size: 0.92em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+}
+
+/* 标题族统一走 --font-display：拉丁 Titillium Web + 中文阿里巴巴普惠体 */
+.display,
+.band-title,
+.card-title,
+.card-country,
+.card-round,
+.card-date-pill,
+.card-hint,
+.card-when,
+.dh-title,
+.dh-round,
+.topnav-item,
+.sub-name,
+.sub-round,
+.sub-date,
+.clock-label,
+.pill-btn,
+.seg-btn,
+.chip,
+.tag,
+.stat span,
+.back-link,
+.cd-strip-title,
+.cd-strip-label,
+.table thead th,
+.news-list a,
+.sched-name,
+.setting-row label,
+.band-note,
+.card-caption,
+.block-note {
+  font-family: var(--font-display);
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.mono {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.up {
+  color: var(--positive);
+}
+
+.down {
+  color: var(--negative);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-4);
+  background-clip: content-box;
+}
+
+/* ================================================================ 顶栏（黑条一） */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--bar);
+  color: var(--bar-ink);
+  -webkit-app-region: drag;
+}
+
+body.is-desktop .topbar-inner {
+  /* 给 Electron 原生标题栏覆盖层留位 */
+  padding-right: 150px;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: stretch;
+  gap: 34px;
+  height: 58px;
+  padding: 0 26px;
+  max-width: 1680px;
+  margin: 0 auto;
+}
+
+.f1-logo {
+  display: flex;
+  align-items: center;
+  font-size: 26px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.06em;
+  color: #fff;
+  -webkit-app-region: no-drag;
+}
+
+.f1-logo b {
+  color: var(--brand);
+  font-weight: 900;
+}
+
+.topnav {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.topnav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--bar-ink-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.topnav-item:hover {
+  color: #fff;
+}
+
+.topnav-item.is-active {
+  color: #fff;
+}
+
+.topnav-item.is-active::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 3px;
+  background: var(--brand);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.topbar-chip {
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+/* 顶栏「设置」触发键：与数据源胶囊同一视觉语言，但可点击 */
+.topbar-btn {
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.topbar-btn:hover,
+.topbar-btn[aria-expanded='true'] {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.topbar-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/*
+   设置面板：作为 <body> 的最后一个元素、position: fixed，位置由 JS 按「设置」按钮的
+   实时 rect 写入。刻意不放进 .topbar —— 顶栏有 z-index: 40 的层叠上下文，
+   放进去会被页面内容（倒计时卡等）盖住。
+*/
+.settings-pop {
+  position: fixed;
+  top: 116px;
+  right: 26px;
+  z-index: 200;
+  width: 320px;
+  padding: 4px 16px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  -webkit-app-region: no-drag;
+}
+
+.settings-pop[hidden] {
+  display: none;
+}
+
+/* 斜切装饰（对应官网顶栏的缺口造型） */
+.topbar-cuts {
+  height: 10px;
+  background: repeating-linear-gradient(
+    105deg,
+    var(--bar) 0 26px,
+    transparent 26px 44px
+  );
+  opacity: 0.9;
+}
+
+/* ================================================================ 次栏（黑条二） */
+
+/* 次栏＝「当前分站」条。用户最终定稿：改回品牌红（「不然太单调了」）。
+   与顶栏一起吸顶：滚动时当前分站与 MY TIME / TRACK TIME 双时钟保持可见
+   （top 用 --titlebar-h，它由 initShellChrome() 按真实顶栏高度写入）。 */
+.subbar {
+  position: sticky;
+  top: var(--titlebar-h, 58px);
+  z-index: 30;
+  background: var(--brand);
+  color: #fff;
+}
+
+.subbar .clock-dot {
+  background: #fff;
+}
+
+.subbar .flag-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.subbar .sub-round {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.subbar .sub-date,
+.subbar .clock-label {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.subbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 54px;
+  padding: 0 26px;
+  max-width: 1680px;
+  margin: 0 auto;
+}
+
+.subbar-race {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sub-round {
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.sub-date {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--bar-ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.sub-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.sub-name::after {
+  content: '›';
+  font-size: 18px;
+  color: var(--bar-ink-dim);
+}
+
+.clocks {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-left: auto;
+}
+
+.clock {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.clock-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--bar-ink-dim);
+}
+
+.clock-time {
+  font-family: var(--font-num);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+/* ================================================================ 页面容器 */
+
+.page {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 34px 26px 60px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.display {
+  flex: 1;
+  margin: 0;
+  font-size: clamp(30px, 4.2vw, 56px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.display sup {
+  font-size: 0.36em;
+  top: -0.9em;
+  letter-spacing: 0;
+}
+
+.page-head-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+/* 胶囊按钮 */
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border: none;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.pill-btn:active {
+  transform: translateY(1px);
+}
+
+.pill-btn-red {
+  background: var(--brand);
+  color: #fff;
+}
+
+.pill-btn-red:hover {
+  background: var(--brand-hover);
+}
+
+.pill-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line-2);
+  color: var(--ink);
+}
+
+.pill-btn-ghost:hover {
+  background: var(--hover);
+}
+
+/* ================================================================ 倒计时条 */
+
+.countdown-strip {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 34px;
+  padding: 18px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.cd-strip-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.cd-strip-title {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.cd-strip-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.countdown {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.cd-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 74px;
+  padding: 8px 12px;
+  background: var(--bar);
+  color: #fff;
+  border-radius: 4px;
+}
+
+.cd-cell b {
+  font-family: var(--font-num);
+  font-size: 30px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.cd-cell i {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ================================================================ 分区与卡片 */
+
+.band {
+  margin-bottom: 38px;
+}
+
+.band-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.band-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.band-note {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+.cards-featured {
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+}
+
+/* 赛历卡片 */
+.race-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 218px;
+  padding: 20px 22px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(21, 21, 30, 0.05);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.race-card:hover {
+  box-shadow: 0 8px 24px rgba(21, 21, 30, 0.12);
+  transform: translateY(-2px);
+}
+
+.race-card.is-next {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.race-card.is-done {
+  opacity: 0.92;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-round {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.is-next .card-round {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.card-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 5px 11px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.is-next .card-date-pill {
+  background: #fff;
+  color: var(--brand);
+}
+
+.card-country {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.card-country .flag {
+  font-size: 22px;
+}
+
+/* 国家代码徽标：Windows 不含彩色旗帜字体，国旗 emoji 会退化成两个字母，
+   因此干脆做成有意的代码徽标（SG / MY / AZ…），跨平台一致。 */
+.flag-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: var(--bar);
+  color: var(--bar-ink);
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.is-next .flag-badge {
+  background: #fff;
+  color: var(--brand);
+}
+
+/* 黑次栏上的徽标 */
+.sub-name .flag-badge {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.card-subtitle {
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.is-next .card-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.card-foot {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.card-when {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-hint {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.is-next .card-hint {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 领奖台行 */
+.podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.podium-item {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+.is-next .podium-item {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.podium-pos {
+  grid-row: 1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.is-next .podium-pos {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.podium-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  grid-row: 1;
+  justify-self: end;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+/* 卡片领奖台行里的小圆头像 */
+.podium-code .avatar {
+  --avatar-size: 18px;
+}
+
+.podium-times {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+
+.is-next .podium-times {
+  color: #fff;
+}
+
+/* ================================================================ 通用卡片与表格 */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 20px;
+  align-items: start;
+}
+
+.split-main,
+.split-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.split-rail {
+  position: sticky;
+  top: 132px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(21, 21, 30, 0.05);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.card-caption {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.card-body {
+  padding: 16px 20px 20px;
+}
+
+.block-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.state {
+  margin: 0;
+  padding: 16px 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.state-loading::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+.state-error {
+  color: var(--negative);
+}
+
+.state-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+/* 表格 */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead th {
+  padding: 0 8px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-align: left;
+  border-bottom: 1px solid var(--line-2);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 110ms ease;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.table tbody tr.is-live {
+  background: color-mix(in srgb, var(--brand) 8%, transparent);
+}
+
+.table tbody tr.is-fav {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+}
+
+.table tbody tr.is-fav:hover {
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+}
+
+.table .pos {
+  width: 30px;
+  font-family: var(--font-num);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.table .pos-1,
+.table .pos-2,
+.table .pos-3 {
+  color: var(--ink);
+}
+
+.table .pts {
+  text-align: right;
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.team-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.team-stripe {
+  flex: 0 0 auto;
+  width: 3px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+/* 车手半身像 / 车队徽标。
+   图源只有 TheSportsDB 一家，缺图时 atoms.js 的 avatar() 直接返回空串，
+   所以这里不需要任何「破图」兜底样式。 */
+.avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size, 34px);
+  height: var(--avatar-size, 34px);
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+
+.avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 半身像：方形原图裁成圆形，取上半部（脸在画面上方） */
+.avatar-driver {
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--surface-sunken), var(--surface));
+}
+
+.avatar-driver img {
+  object-fit: cover;
+  object-position: 50% 12%;
+}
+
+/* 车队徽标：各家比例差异很大（Williams 1.35、Audi 5.86），统一**锁高度**不锁宽度 ——
+   高度锁死视觉重量才一致，宽度随比例走才是徽标本来的样子（F1 官网也是这么排的）。
+   前提：图片已由 tools/normalize-logos.py 裁掉透明留白（画布 = 墨迹），否则 contain
+   适配的是画布，墨迹小的那几家会显得又小又虚。 */
+.avatar-team {
+  width: auto;
+  min-width: 40px;
+  max-width: 168px;
+  padding: 0 6px 0 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.avatar-team img {
+  width: auto;
+  max-width: 100%;
+  height: calc(var(--avatar-size, 34px) - 8px);
+  object-fit: contain;
+  object-position: left center;
+}
+
+.cell-name {
+  font-weight: 700;
+}
+
+.cell-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.tag-live {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* 分段控件 */
+.seg {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  padding: 2px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+}
+
+.seg-btn {
+  padding: 5px 13px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+
+.seg-btn:hover {
+  color: var(--ink);
+}
+
+.seg-btn.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(21, 21, 30, 0.12);
+}
+
+/* 关注星标 */
+.star {
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: var(--line-2);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 110ms ease, transform 110ms ease;
+}
+
+.star:hover {
+  color: var(--warning);
+  transform: scale(1.14);
+}
+
+.star.is-on {
+  color: var(--warning);
+}
+
+.fav-cell {
+  width: 30px;
+  text-align: right;
+}
+
+/* 统计块 */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+.stat b {
+  display: block;
+  font-family: var(--font-num);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.stat span {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+/*
+ * 通用语义色调（tone）：凡是标了 .tone-warn 的数值都走 --warning。
+ * 时间表的「降水 ≥70%」格子就是靠这条上色（.mono.tone-warn）。
+ */
+.tone-warn {
+  color: var(--warning);
+}
+
+/*
+ * 统计格的语义色：只落在真实字段上（时间表用 .tone-warn，其余页面复用）。
+ * 不给所有格子一律上色 —— 没有语义的格子保持中性灰底。
+ */
+.stat-row .stat.tone-ink {
+  background: var(--surface);
+  border-color: var(--line-2);
+}
+
+.stat-row .stat.tone-ink b {
+  color: var(--ink);
+}
+
+.stat-row .stat.tone-warn {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 34%, transparent);
+}
+
+.stat-row .stat.tone-warn b {
+  color: var(--warning);
+}
+
+/* 领奖台聚焦：对齐 F1 官方海报口径 —— 大图 + 车队色底 + 半透明名次数字。
+   照片是透明 PNG 半身像，贴底对齐；底色用 --team（safeColor 白名单过），
+   文字放在白卡上而不是彩底上，避免 Mercedes 青、Haas 灰这类亮底压不住白字。
+   命名一律 podium-hero-*：赛历卡片里的领奖台行用的是 .podium 家族
+   （.podium / .podium-item / .podium-pos / .podium-code / .podium-times），两套类互不复用。 */
+.podium-hero {
+  display: grid;
+  grid-template-columns: 1fr 1.18fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* 经典领奖台站位：1 在中间 */
+.podium-hero-1 { order: 2; }
+.podium-hero-2 { order: 1; }
+.podium-hero-3 { order: 3; }
+
+.podium-hero-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.podium-hero-photo {
+  position: relative;
+  display: block;
+  height: 176px;
+  background: var(--team, var(--surface-sunken));
+}
+
+.podium-hero-1 .podium-hero-photo {
+  height: 208px;
+}
+
+.podium-hero-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 100%;
+}
+
+/* 名次数字压在照片上，半透明（海报同款做法） */
+.podium-hero-rank {
+  position: absolute;
+  top: 2px;
+  left: 14px;
+  z-index: 1;
+  font-family: var(--font-num);
+  font-size: 78px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.42);
+  text-shadow: 0 1px 6px rgba(21, 21, 30, 0.22);
+  pointer-events: none;
+}
+
+.podium-hero-1 .podium-hero-rank {
+  font-size: 92px;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.podium-hero-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding: 11px 14px 2px;
+}
+
+.podium-hero-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.podium-hero-team {
+  font-size: 12px;
+  font-style: normal;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.podium-hero-time {
+  padding: 0 14px 13px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+@media (max-width: 900px) {
+  .podium-hero {
+    grid-template-columns: 1fr;
+  }
+  .podium-hero-1,
+  .podium-hero-2,
+  .podium-hero-3 {
+    order: 0;
+  }
+  .podium-hero-photo,
+  .podium-hero-1 .podium-hero-photo {
+    height: 150px;
+  }
+}
+
+/* 小标签 */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+
+.chip-sprint {
+  background: color-mix(in srgb, var(--sector-purple) 16%, transparent);
+  color: var(--sector-purple);
+}
+
+.chip-weather {
+  background: color-mix(in srgb, var(--positive) 16%, transparent);
+  color: var(--positive);
+}
+
+/* 但新闻来源/时间这类元信息要比 .chip 更淡 */
+.chip.chip-meta {
+  padding: 2px 7px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+/* 时间表 */
+.sessions-table td:first-child {
+  position: relative;
+  padding-left: 16px;
+}
+
+/*
+ * 会话类型的正统色（F1 计时屏口径）：正赛红 / 排位赛紫圈 / 冲刺赛橙 / 练习赛中灰。
+ * 只在会话名左侧加 3px 竖条 + 给会话名文字上色，不给整行铺色 ——
+ * 行底色留给 .table tbody tr.is-live（进行中）。
+ */
+.session-name {
+  position: relative;
+}
+
+.session-name::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--ink-3);
+}
+
+.session-name.session-race {
+  color: var(--brand);
+}
+
+.session-name.session-race::before {
+  background: var(--brand);
+}
+
+.session-name.session-quali {
+  color: var(--sector-purple);
+}
+
+.session-name.session-quali::before {
+  background: var(--sector-purple);
+}
+
+.session-name.session-sprint {
+  color: var(--warning);
+}
+
+.session-name.session-sprint::before {
+  background: var(--warning);
+}
+
+.session-name.session-practice {
+  color: var(--ink-2);
+}
+
+.session-name.session-practice::before {
+  background: var(--ink-3);
+}
+
+.session-name .cell-sub {
+  color: var(--ink-3);
+}
+
+.sched-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sched-row {
+  display: grid;
+  grid-template-columns: 116px 62px minmax(0, 1fr) 132px 96px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.sched-row:last-child {
+  border-bottom: none;
+}
+
+.sched-row.is-race {
+  font-weight: 700;
+}
+
+.sched-row.is-race .sched-name {
+  color: var(--brand);
+}
+
+.sched-row.is-live {
+  background: color-mix(in srgb, var(--brand) 8%, transparent);
+  box-shadow: inset 3px 0 0 var(--brand);
+  padding-left: 12px;
+}
+
+.sched-day {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.sched-time {
+  font-family: var(--font-num);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sched-name i {
+  display: block;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--ink-4);
+}
+
+.sched-wx {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.sched-wx i {
+  display: block;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.sched-state {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+/* 新闻 */
+.news-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.news-list li {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.news-list li:last-child {
+  border-bottom: none;
+}
+
+.news-list a {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.42;
+}
+
+.news-list a:hover {
+  color: var(--brand);
+}
+
+.news-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+/* 设置 */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-title {
+  margin: 10px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.setting-row select {
+  padding: 6px 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-size: 12.5px;
+}
+
+.setting-row input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand);
+}
+
+.setting-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.setting-note {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* ================================================================ 详情页 */
+
+.detail-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 34px 26px 60px;
+}
+
+.detail-hero {
+  position: relative;
+  padding: 26px 32px 30px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(21, 21, 30, 0.05);
+}
+
+.dh-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.back-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.back-link:hover {
+  color: var(--brand);
+}
+
+.dh-round {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.dh-title {
+  margin: 0;
+  font-size: clamp(26px, 3.4vw, 44px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+  text-transform: uppercase;
+}
+
+.dh-sub {
+  margin: 8px 0 0;
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+
+.dh-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+.detail-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.detail-grid .card-body {
+  max-height: 620px;
+  overflow: auto;
+}
+
+/* ================================================================ 页脚 */
+
+.app-footer {
+  padding: 18px 26px 26px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  max-width: 1680px;
+  margin: 0 auto;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.status-item b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ================================================================ 响应式 */
+
+@media (max-width: 1280px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+  .sched-row {
+    grid-template-columns: 100px 56px minmax(0, 1fr) 118px;
+  }
+  .sched-state {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .split-rail {
+    position: static;
+  }
+  .detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .countdown-strip {
+    flex-wrap: wrap;
+  }
+  .countdown {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .page,
+  .detail-shell {
+    padding: 20px 16px 44px;
+  }
+  .topbar-inner,
+  .subbar-inner {
+    padding: 0 16px;
+  }
+  .topnav-item {
+    padding: 0 10px;
+    font-size: 13.5px;
+  }
+  .clocks {
+    gap: 14px;
+  }
+  .cards,
+  .cards-featured {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sched-row {
+    grid-template-columns: 92px 52px minmax(0, 1fr);
+  }
+  .sched-wx {
+    display: none;
+  }
+  .cd-cell {
+    min-width: 60px;
+    padding: 6px 9px;
+  }
+  .cd-cell b {
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.jolpi.ca https://api.open-meteo.com https://www.formula1.com https://www.motorsport.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>下一站 · F1 观赛助手</title>
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/pages/home.css">
+</head>
+<body>
+  <!-- 黑条一：站内导航（首页不属于 4 项导航，logo 即回首页） -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="f1-logo" href="index.html" aria-label="F1"><b>F1</b></a>
+      <nav class="topnav" id="topnav"></nav>
+      <div class="topbar-right">
+        <span class="topbar-chip" id="data-source">数据加载中</span>
+        <button type="button" class="topbar-btn" id="act-settings" aria-expanded="false" aria-controls="settings-pop">设置</button>
+      </div>
+    </div>
+    <div class="topbar-cuts" aria-hidden="true"></div>
+  </header>
+
+  <!-- 黑条二：当前分站 + 双时钟 -->
+  <div class="subbar">
+    <div class="subbar-inner">
+      <div class="subbar-race">
+        <span class="sub-round" id="sub-round">R--</span>
+        <span class="sub-date" id="sub-date">-- – -- ---</span>
+        <span class="sub-name"><span class="flag-badge" id="sub-flag">--</span><span id="sub-name">载入中</span></span>
+      </div>
+      <div class="clocks">
+        <div class="clock">
+          <span class="clock-dot" aria-hidden="true"></span>
+          <span class="clock-label">MY TIME</span>
+          <span class="clock-time" id="clock-local">--:--</span>
+        </div>
+        <div class="clock">
+          <span class="clock-label">TRACK TIME</span>
+          <span class="clock-time" id="clock-track">--:--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="page-head">
+      <h1 class="display">2026 赛季 · 下一站</h1>
+      <div class="page-head-actions">
+        <button class="pill-btn pill-btn-red" id="act-refresh">刷新数据</button>
+      </div>
+    </div>
+
+    <!-- ① 下一站倒计时：白卡片 + 4 格倒计时（容器上没有任何竖条 / 左边框装饰） -->
+    <section class="countdown-strip home-strip" aria-label="下一站倒计时">
+      <div class="home-strip-inner" id="hero">
+        <p class="state state-loading">正在载入赛季数据…</p>
+      </div>
+    </section>
+
+    <!-- ② 下一站的具体数据与时间：硬数据 statRow + 完整周末时间表（由 sessionsPanelHtml 渲染） -->
+    <section class="card home-card" id="race-card" aria-label="下一站数据与时间">
+      <header class="card-head">
+        <h2 class="card-title">下一站 · 数据与时间</h2>
+        <span class="card-caption" id="race-caption">载入中…</span>
+      </header>
+      <div class="card-body" id="race-body">
+        <p class="state state-loading">加载中…</p>
+      </div>
+    </section>
+
+    <!-- ③ 相关新闻：点击由 bindShellEvents 的 data-external 分支交给系统浏览器打开 -->
+    <section class="card home-card" id="news-card" aria-label="相关新闻">
+      <header class="card-head">
+        <h2 class="card-title">相关新闻</h2>
+        <span class="card-caption">Formula 1 官方</span>
+      </header>
+      <div class="card-body" id="news-body">
+        <p class="state state-loading">加载中…</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚：提醒与设置不再占版面，只留一行文字 + 两个小按钮 + 状态栏 -->
+  <footer class="app-footer">
+    <div class="home-footer-row">
+      <p class="home-footer-note">赛前提醒每分钟自动检查一次 · 完整赛历 / 积分榜 / 成绩见顶部导航</p>
+      <div class="home-footer-actions">
+        <button class="pill-btn pill-btn-ghost home-footer-btn" id="act-test-notify">测试通知</button>
+        <button class="pill-btn pill-btn-ghost home-footer-btn" id="act-about">关于</button>
+      </div>
+    </div>
+    <div class="status-bar" id="status-bar"></div>
+  </footer>
+
+  <noscript>
+    <p class="state state-error">本应用需要启用 JavaScript。</p>
+  </noscript>
+
+  <script type="module" src="assets/js/pages/home.js"></script>
+  <div class="settings-pop" id="settings-pop" hidden></div>
+</body>
+</html>

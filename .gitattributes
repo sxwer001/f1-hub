@@ -1,0 +1,20 @@
+# 统一换行符，避免跨平台提交把整份文件标成「已修改」
+* text=auto eol=lf
+
+# 二进制资源不做文本处理
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff2 binary
+*.otf binary
+*.ttf binary
+*.exe binary
+*.zip binary
+
+# 生成物在 diff 里折叠
+pnpm-lock.yaml linguist-generated=true
+assets/data/season.json linguist-generated=true
+assets/js/data/photos.js linguist-generated=true

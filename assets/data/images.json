@@ -1,0 +1,350 @@
+{
+  "source": "TheSportsDB",
+  "license": "见 thesportsdb.com 条款；仅本地展示用",
+  "fetchedAt": "2026-10-07T04:15:31.700Z",
+  "drivers": {
+    "antonelli": {
+      "name": "Andrea Kimi Antonelli",
+      "code": "ANT",
+      "number": "",
+      "team": "Mercedes",
+      "teamZh": "梅赛德斯",
+      "teamColor": "#27f4d2",
+      "file": "assets/img/drivers/antonelli.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/8s9ouj1769371565.png",
+      "idPlayer": "34248269"
+    },
+    "russell": {
+      "name": "George Russell",
+      "code": "RUS",
+      "number": "",
+      "team": "Mercedes",
+      "teamZh": "梅赛德斯",
+      "teamColor": "#27f4d2",
+      "file": "assets/img/drivers/russell.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/cmqswc1769371629.png",
+      "idPlayer": "34164000"
+    },
+    "hamilton": {
+      "name": "Lewis Hamilton",
+      "code": "HAM",
+      "number": "",
+      "team": "Ferrari",
+      "teamZh": "法拉利",
+      "teamColor": "#e8002d",
+      "file": "assets/img/drivers/hamilton.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/exado51769372031.png",
+      "idPlayer": "34157136"
+    },
+    "leclerc": {
+      "name": "Charles Leclerc",
+      "code": "LEC",
+      "number": "",
+      "team": "Ferrari",
+      "teamZh": "法拉利",
+      "teamColor": "#e8002d",
+      "file": "assets/img/drivers/leclerc.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/t7asa51769372100.png",
+      "idPlayer": "34162284"
+    },
+    "norris": {
+      "name": "Lando Norris",
+      "code": "NOR",
+      "number": "",
+      "team": "McLaren",
+      "teamZh": "迈凯伦",
+      "teamColor": "#ff8000",
+      "file": "assets/img/drivers/norris.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/og7n5r1769371379.png",
+      "idPlayer": "34164004"
+    },
+    "max_verstappen": {
+      "name": "Max Verstappen",
+      "code": "VER",
+      "number": "",
+      "team": "Red Bull",
+      "teamZh": "红牛",
+      "teamColor": "#3671c6",
+      "file": "assets/img/drivers/max_verstappen.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/fiyui61769371945.png",
+      "idPlayer": "34157146"
+    },
+    "piastri": {
+      "name": "Oscar Piastri",
+      "code": "PIA",
+      "number": "",
+      "team": "McLaren",
+      "teamZh": "迈凯伦",
+      "teamColor": "#ff8000",
+      "file": "assets/img/drivers/piastri.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/ce3zpq1769371471.png",
+      "idPlayer": "34171060"
+    },
+    "hadjar": {
+      "name": "Isack Hadjar",
+      "code": "HAD",
+      "number": "",
+      "team": "Red Bull",
+      "teamZh": "红牛",
+      "teamColor": "#3671c6",
+      "file": "assets/img/drivers/hadjar.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/ifqmow1772534127.png",
+      "idPlayer": "34215944"
+    },
+    "lawson": {
+      "name": "Liam Lawson",
+      "code": "LAW",
+      "number": "",
+      "team": "Red Bull",
+      "teamZh": "红牛",
+      "teamColor": "#3671c6",
+      "file": "assets/img/drivers/lawson.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/3wa7ut1769372613.png",
+      "idPlayer": "34167833"
+    },
+    "gasly": {
+      "name": "Pierre Gasly",
+      "code": "GAS",
+      "number": "",
+      "team": "Alpine F1 Team",
+      "teamZh": "Alpine",
+      "teamColor": "#ff87bc",
+      "file": "assets/img/drivers/gasly.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/6tef141769371181.png",
+      "idPlayer": "34162285"
+    },
+    "arvid_lindblad": {
+      "name": "Arvid Lindblad",
+      "code": "LIN",
+      "number": "",
+      "team": "RB F1 Team",
+      "teamZh": "红牛二队",
+      "teamColor": "#6692ff",
+      "file": "assets/img/drivers/arvid_lindblad.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/fspuvx1770026197.png",
+      "idPlayer": "34315431"
+    },
+    "colapinto": {
+      "name": "Franco Colapinto",
+      "code": "COL",
+      "number": "",
+      "team": "Alpine F1 Team",
+      "teamZh": "Alpine",
+      "teamColor": "#ff87bc",
+      "file": "assets/img/drivers/colapinto.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/uztkh41769371230.png",
+      "idPlayer": "34215955"
+    },
+    "bearman": {
+      "name": "Oliver Bearman",
+      "code": "BEA",
+      "number": "",
+      "team": "Haas F1 Team",
+      "teamZh": "哈斯",
+      "teamColor": "#b6babd",
+      "file": "assets/img/drivers/bearman.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/f4stqe1769371755.png",
+      "idPlayer": "34215943"
+    },
+    "bortoleto": {
+      "name": "Gabriel Bortoleto",
+      "code": "BOR",
+      "number": "",
+      "team": "Audi",
+      "teamZh": "奥迪",
+      "teamColor": "#52e252",
+      "file": "assets/img/drivers/bortoleto.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/dw6mi31773160637.png",
+      "idPlayer": "34215951"
+    },
+    "hulkenberg": {
+      "name": "Nico Hülkenberg",
+      "code": "HUL",
+      "number": "",
+      "team": "Audi",
+      "teamZh": "奥迪",
+      "teamColor": "#52e252",
+      "file": "assets/img/drivers/hulkenberg.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/90zkg81773160744.png",
+      "idPlayer": "34157150"
+    },
+    "ocon": {
+      "name": "Esteban Ocon",
+      "code": "OCO",
+      "number": "",
+      "team": "Haas F1 Team",
+      "teamZh": "哈斯",
+      "teamColor": "#b6babd",
+      "file": "assets/img/drivers/ocon.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/m7uhbe1769371819.png",
+      "idPlayer": "34161407"
+    },
+    "alonso": {
+      "name": "Fernando Alonso",
+      "code": "ALO",
+      "number": "",
+      "team": "Aston Martin",
+      "teamZh": "阿斯顿·马丁",
+      "teamColor": "#229971",
+      "file": "assets/img/drivers/alonso.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/rmczq21677931848.png",
+      "idPlayer": "34157142"
+    },
+    "sainz": {
+      "name": "Carlos Sainz",
+      "code": "SAI",
+      "number": "",
+      "team": "Williams",
+      "teamZh": "威廉姆斯",
+      "teamColor": "#1868db",
+      "file": "assets/img/drivers/sainz.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/4ojzdf1769372410.png",
+      "idPlayer": "34157147"
+    },
+    "albon": {
+      "name": "Alexander Albon",
+      "code": "ALB",
+      "number": "",
+      "team": "Williams",
+      "teamZh": "威廉姆斯",
+      "teamColor": "#1868db",
+      "file": "assets/img/drivers/albon.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/x6mxpp1769372345.png",
+      "idPlayer": "34164007"
+    },
+    "tsunoda": {
+      "name": "Yuki Tsunoda",
+      "code": "TSU",
+      "number": "",
+      "team": "RB F1 Team",
+      "teamZh": "红牛二队",
+      "teamColor": "#6692ff",
+      "file": "assets/img/drivers/tsunoda.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/i2n4tt1769371881.png",
+      "idPlayer": "34167830"
+    },
+    "stroll": {
+      "name": "Lance Stroll",
+      "code": "STR",
+      "number": "",
+      "team": "Aston Martin",
+      "teamZh": "阿斯顿·马丁",
+      "teamColor": "#229971",
+      "file": "assets/img/drivers/stroll.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/25otva1679827137.png",
+      "idPlayer": "34161298"
+    },
+    "bottas": {
+      "name": "Valtteri Bottas",
+      "code": "BOT",
+      "number": "",
+      "team": "Cadillac F1 Team",
+      "teamZh": "凯迪拉克",
+      "teamColor": "#d4af37",
+      "file": "assets/img/drivers/bottas.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/kf5lq01772535017.png",
+      "idPlayer": "34157144"
+    },
+    "perez": {
+      "name": "Sergio Pérez",
+      "code": "PER",
+      "number": "",
+      "team": "Cadillac F1 Team",
+      "teamZh": "凯迪拉克",
+      "teamColor": "#d4af37",
+      "file": "assets/img/drivers/perez.png",
+      "source": "https://r2.thesportsdb.com/images/media/player/cutout/tk90eh1662920615.png",
+      "idPlayer": "34157151"
+    }
+  },
+  "teams": {
+    "mercedes": {
+      "name": "Mercedes",
+      "nameZh": "梅赛德斯",
+      "nationality": "German",
+      "file": "assets/img/teams/mercedes.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/u4camx1740775514.png",
+      "matchedTeam": "Mercedes-AMG PETRONAS Formula One Team"
+    },
+    "ferrari": {
+      "name": "Ferrari",
+      "nameZh": "法拉利",
+      "nationality": "Italian",
+      "file": "assets/img/teams/ferrari.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/td4bz71740775696.png",
+      "matchedTeam": "Scuderia Ferrari HP"
+    },
+    "mclaren": {
+      "name": "McLaren",
+      "nameZh": "迈凯伦",
+      "nationality": "British",
+      "file": "assets/img/teams/mclaren.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/wgp7v71740775101.png",
+      "matchedTeam": "McLaren Formula 1 Team"
+    },
+    "red_bull": {
+      "name": "Red Bull",
+      "nameZh": "红牛",
+      "nationality": "Austrian",
+      "file": "assets/img/teams/red_bull.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/4yaca61537022600.png",
+      "matchedTeam": "Oracle Red Bull Racing"
+    },
+    "rb": {
+      "name": "RB F1 Team",
+      "nameZh": "红牛二队",
+      "nationality": "Italian",
+      "file": "assets/img/teams/rb.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/f8tmwb1740775833.png",
+      "matchedTeam": "Visa Cash App Racing Bulls Formula One Team"
+    },
+    "alpine": {
+      "name": "Alpine F1 Team",
+      "nameZh": "Alpine",
+      "nationality": "French",
+      "file": "assets/img/teams/alpine.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/xf3yia1740774815.png",
+      "matchedTeam": "BWT Alpine Formula One Team"
+    },
+    "haas": {
+      "name": "Haas F1 Team",
+      "nameZh": "哈斯",
+      "nationality": "American",
+      "file": "assets/img/teams/haas.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/vp4v2o1740773575.png",
+      "matchedTeam": "MoneyGram Haas F1 Team"
+    },
+    "audi": {
+      "name": "Audi",
+      "nameZh": "奥迪",
+      "nationality": "German",
+      "file": "assets/img/teams/audi.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/bx7mk11773159665.png",
+      "matchedTeam": "Audi Revolut F1 Team"
+    },
+    "williams": {
+      "name": "Williams",
+      "nameZh": "威廉姆斯",
+      "nationality": "British",
+      "file": "assets/img/teams/williams.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/34ynd51740775993.png",
+      "matchedTeam": "Williams Racing"
+    },
+    "aston_martin": {
+      "name": "Aston Martin",
+      "nameZh": "阿斯顿·马丁",
+      "nationality": "British",
+      "file": "assets/img/teams/aston_martin.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/bclyj11740773842.png",
+      "matchedTeam": "Aston Martin Aramco Formula One Team"
+    },
+    "cadillac": {
+      "name": "Cadillac F1 Team",
+      "nameZh": "凯迪拉克",
+      "nationality": "American",
+      "file": "assets/img/teams/cadillac.png",
+      "source": "https://r2.thesportsdb.com/images/media/team/logo/5gs9nm1769429641.png",
+      "matchedTeam": "Cadillac Formula 1 Team"
+    }
+  }
+}

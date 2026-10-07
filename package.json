@@ -1,0 +1,58 @@
+{
+  "name": "f1-hub",
+  "productName": "F1 观赛助手",
+  "version": "1.0.2",
+  "description": "F1 观赛助手 —— 真实赛历、会话倒计时、赛前提醒的桌面端应用",
+  "private": true,
+  "main": "electron/main.js",
+  "author": "f1-hub",
+  "license": "MIT",
+  "scripts": {
+    "start": "node tools/launch.mjs",
+    "dev": "node tools/launch.mjs --dev",
+    "selftest": "node tools/launch.mjs --selftest",
+    "data": "node tools/fetch-data.mjs",
+    "check": "node tools/check-page.mjs home && node tools/check-pages.mjs",
+    "check:pages": "node tools/check-pages.mjs",
+    "check:smoke": "node tools/smoke-schedule.mjs && node tools/smoke-results.mjs",
+    "dist": "electron-builder --win --x64",
+    "dist:portable": "electron-builder --win portable zip --x64",
+    "pack": "electron-builder --win --x64 --dir"
+  },
+  "devDependencies": {
+    "electron": "38.8.6",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.f1hub.desktop",
+    "productName": "F1 Hub",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "pages/**/*",
+      "assets/**/*",
+      "!assets/img/teams/_raw/**",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "F1 观赛助手"
+    }
+  }
+}

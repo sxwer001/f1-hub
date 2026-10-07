@@ -1,0 +1,17 @@
+# 依赖与构建产物
+node_modules/
+dist/
+
+# 工具产生的临时报告与截图
+tools/_reports/
+shots/
+
+# 车队徽标的原图备份（归一化前的下载件，可由 tools/fetch-images.mjs --force 重新下载）
+assets/img/teams/_raw/
+
+# 编辑器与系统
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.log

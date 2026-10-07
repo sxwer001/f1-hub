@@ -1,0 +1,160 @@
+/* ==========================================================================
+   首页（pages/home.css）—— 「下一站焦点」版
+   只承载三块内容：① 下一站倒计时 ② 下一站数据与时间 ③ 相关新闻
+   页脚只留一行文字 + 两个小按钮（提醒 / 关于不再占版面）。
+
+   设计风格沿用全站：亮色底、白卡片、黑顶栏、tokens 变量配色。
+   刻意说明：倒计时卡片（.home-strip / #hero-count-target）**没有装饰性竖条** ——
+   没有 border-left、没有 ::before 窄条、也没有 box-shadow: inset … var(--brand)。
+   打破「纯白卡」用的是细品牌红强调：卡片 3px 顶边 + 4 格 .cd-cell 底色（见下方 ②）。
+   颜色一律取自 tokens.css，字体一律继承全站设置（不写 font-family）。
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- ① 倒计时 */
+
+/* .countdown-strip 提供白卡片外观（main.css:426），这里只补首页特有排布 */
+.home-strip {
+  margin-bottom: 26px;
+}
+
+.home-strip-inner {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+  min-width: 0;
+}
+
+.home-strip-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.home-strip-copy .cd-strip-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.home-strip-copy .cd-strip-label {
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-strip-copy .cd-strip-note {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+/* 4 格倒计时容器：靠右，块级承载 .countdown */
+.home-strip-cells {
+  display: block;
+  margin-left: auto;
+}
+
+.home-strip-cells .countdown {
+  margin-left: 0;
+}
+
+/*
+ * 打破首页「白卡 + 红卡 + 白卡」的单调：
+ * 卡片 3px 品牌红顶边（细，不是此前被去掉的 5px 粗竖条），
+ * 4 个 .cd-cell 底色从 --bar 换成 --brand，让倒计时本身成为唯一一块红。
+ * 顶层 padding 由 18px 收到 15px，加边后卡片总高不变。
+ */
+.home-strip {
+  border-top: 3px solid var(--brand);
+  padding-top: 15px;
+}
+
+.home-strip-cells .cd-cell {
+  background: var(--brand);
+}
+
+.home-strip-cells .cd-cell i {
+  /* 小号大写标签压在品牌红上：压到 .88 才够对比（--bar 上的 .7 在这里偏糊） */
+  color: var(--brand-ink);
+  opacity: 0.88;
+}
+
+/* ------------------------------------------------------- ② 下一站数据与时间 */
+
+.home-card {
+  margin-bottom: 26px;
+}
+
+/* 时间表（.sessions-table / .cell-sub）与新闻（.news-list）的排版由 main.css 提供，
+   首页不覆盖：会话名中文 + 英文两行沿用全站样式。 */
+
+/* ---------------------------------------------------------------- 页脚 */
+
+.home-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  max-width: var(--shell-max);
+  margin: 0 auto 12px;
+}
+
+.home-footer-note {
+  flex: 1 1 260px;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.home-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 紧凑小按钮：覆盖 .pill-btn 的大内边距 */
+.home-footer-btn {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- 响应式 */
+
+@media (max-width: 1024px) {
+  .home-strip-cells {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-strip {
+    margin-bottom: 20px;
+  }
+
+  .home-strip-copy .cd-strip-title {
+    font-size: 24px;
+  }
+
+  .home-strip-cells .cd-cell {
+    min-width: 62px;
+  }
+
+  .home-strip-cells .cd-cell b {
+    font-size: 24px;
+  }
+
+  .home-card {
+    margin-bottom: 20px;
+  }
+
+  .home-footer-row {
+    margin-bottom: 10px;
+  }
+}

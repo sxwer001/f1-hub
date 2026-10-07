@@ -1,0 +1,334 @@
+/* ==========================================================================
+   F1 观赛助手 —— 设计令牌
+   色板与字体度量取自 formula1.com 的 F1 设计系统（CSS 变量前缀 --f1rd-*），
+   映射为语义化令牌，明暗双套。深色为 canonical（官网默认呈现）。
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-300-normal.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-ext-300-normal.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-ext-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-ext-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-ext-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-900-normal.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  src: url('../fonts/titillium/titillium-web-latin-ext-900-normal.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* 阿里巴巴普惠体 —— 中文。厚重、方正、端点平切，与 F1 官方海报里的中文属同一类
+   「冲击力标题字」，是中文体育/营销图的常用字。OFL 之外的自有许可，允许随应用分发。
+   用 unicode-range 把作用域限制在 CJK：拉丁字母继续交给 Titillium Web（F1 品牌字的
+   定制来源），避免两套字形在同一行里抢戏。 */
+@font-face {
+  font-family: 'PuHuiTi';
+  src: url('../fonts/puhuiti/PuHuiTi-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2E80-2EFF, U+3000-303F, U+3040-30FF, U+3100-312F, U+31A0-31BF,
+    U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
+@font-face {
+  font-family: 'PuHuiTi';
+  src: url('../fonts/puhuiti/PuHuiTi-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2E80-2EFF, U+3000-303F, U+3040-30FF, U+3100-312F, U+31A0-31BF,
+    U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
+@font-face {
+  font-family: 'PuHuiTi';
+  src: url('../fonts/puhuiti/PuHuiTi-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2E80-2EFF, U+3000-303F, U+3040-30FF, U+3100-312F, U+31A0-31BF,
+    U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
+@font-face {
+  font-family: 'PuHuiTi';
+  src: url('../fonts/puhuiti/PuHuiTi-Heavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2E80-2EFF, U+3000-303F, U+3040-30FF, U+3100-312F, U+31A0-31BF,
+    U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
+
+:root {
+  color-scheme: light;
+
+  /* ---- 品牌 ---- */
+  --brand: #e10600;
+  --brand-hover: #ff1a10;
+  --brand-press: #c00500;
+  --brand-ink: #ffffff;
+
+  /* ---- 黑色导航条（官网顶部两条黑条） ---- */
+  --bar: #15151e;
+  --bar-2: #000000;
+  --bar-ink: #ffffff;
+  --bar-ink-dim: rgba(255, 255, 255, 0.72);
+
+  --bar: #15151e;
+  --bar-2: #000000;
+  --bar-ink: #ffffff;
+  --bar-ink-dim: rgba(255, 255, 255, 0.72);
+
+  /* ---- 字体 ----
+     --font-sans    ：正文与界面。拉丁走 Titillium Web，中文走阿里巴巴普惠体。
+     --font-display ：标题。同一组合，配合大字号 / 900 字重 / 收紧字距。
+     --font-num     ：数字与时间，强制 tabular-nums 对齐。 */
+  --font-sans: 'Titillium Web', 'PuHuiTi', -apple-system, BlinkMacSystemFont,
+    'Segoe UI Variable Text', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-display: 'Titillium Web', 'PuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  /* 注意：这个栈里**必须**有中文字体。
+     原先写作 `'Titillium Web', ui-monospace, …, monospace` —— 栈内没有任何中文字体，
+     中文只能落到 `monospace`，而 Windows 上 monospace 的中文回退是**宋体（SimSun）**。
+     凡是套了 --font-num 的地方（.stat b 统计值、.mono 单元格、code 等）只要出现中文就会变宋体。 */
+  --font-num: 'Titillium Web', 'PuHuiTi', ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+
+  /* ---- 语义色（亮色默认） ---- */
+  --positive: #1a8930;
+  --negative: #e91711;
+  --warning: #b26a00;
+  --sector-purple: #5300a6;
+  --drs-green: #1a8930;
+
+  /* ---- 亮色表面 ---- */
+  --bg: #f3f3f4;
+  --bg-deep: #e0dedc;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --surface-3: #f7f4f1;
+  --surface-sunken: #e8e8ea;
+  --surface-inverse: #15151e;
+
+  /* ---- 亮色文字 ---- */
+  --ink: #15151e;
+  --ink-2: #303037;
+  --ink-3: #606066;
+  --ink-4: #8e8e94;
+  --ink-inverse: #ffffff;
+
+  /* ---- 描边 ---- */
+  --line: #dcdcdf;
+  --line-2: #c9c9cd;
+  --line-inverse: #303037;
+
+  /* ---- 交互态 ---- */
+  --hover: rgba(21, 21, 30, 0.05);
+  --active: rgba(21, 21, 30, 0.09);
+  --focus-ring: #e10600;
+  --scrim: rgba(21, 21, 30, 0.55);
+
+  /* ---- 阴影 ---- */
+  --shadow-1: 0 1px 2px rgba(21, 21, 30, 0.06);
+  --shadow-2: 0 8px 24px rgba(21, 21, 30, 0.1);
+  --shadow-3: 0 24px 60px rgba(21, 21, 30, 0.18);
+
+  /* ---- 圆角（F1 设计系统偏方正） ---- */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* ---- 间距阶梯 ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 56px;
+
+  /* ---- 动效 ---- */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+
+  /* ---- 布局 ---- */
+  --titlebar-h: 44px;
+  --rail-w: 372px;
+  --shell-max: 1680px;
+  --z-titlebar: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
+}
+
+/* 主题切换策略（对齐 formula1.com 的实际呈现）
+   官网默认是亮色：#f3f3f4 底 + 白色卡片 + 黑色导航条 + #e10600 强调。
+   因此这里 **不以 prefers-color-scheme 为准**，而是显式主题：
+     <html>                      → 亮色（默认）
+     <html data-theme="dark">    → 暗色
+     <html data-theme="system">  → 跟随系统
+   暗色令牌与亮色一一对应（F1 设计系统里二者是同一套刻度反相）。 */
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --positive: #28973e;
+  --negative: #ff2d27;
+  --warning: #e0a02a;
+  --sector-purple: #7a1fd0;
+  --drs-green: #28973e;
+
+  --bg: #15151e;
+  --bg-deep: #0b0b10;
+  --surface: #26262b;
+  --surface-2: #2c2c33;
+  --surface-3: #303037;
+  --surface-sunken: #1b1b22;
+  --surface-inverse: #f7f4f1;
+
+  --ink: #ffffff;
+  --ink-2: #f7f4f1;
+  --ink-3: #aaaaad;
+  --ink-4: #74747a;
+  --ink-inverse: #15151e;
+
+  --line: #34343c;
+  --line-2: #47464c;
+  --line-inverse: #cdcdcd;
+
+  --hover: rgba(255, 255, 255, 0.06);
+  --active: rgba(255, 255, 255, 0.1);
+  --scrim: rgba(0, 0, 0, 0.62);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-3: 0 28px 70px rgba(0, 0, 0, 0.6);
+
+  --bar: #000000;
+  --bar-ink: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='system'] {
+    color-scheme: dark;
+
+    --positive: #28973e;
+    --negative: #ff2d27;
+    --warning: #e0a02a;
+    --sector-purple: #7a1fd0;
+
+    --bg: #15151e;
+    --bg-deep: #0b0b10;
+    --surface: #26262b;
+    --surface-2: #2c2c33;
+    --surface-3: #303037;
+    --surface-sunken: #1b1b22;
+    --surface-inverse: #f7f4f1;
+
+    --ink: #ffffff;
+    --ink-2: #f7f4f1;
+    --ink-3: #aaaaad;
+    --ink-4: #74747a;
+    --ink-inverse: #15151e;
+
+    --line: #34343c;
+    --line-2: #47464c;
+    --line-inverse: #cdcdcd;
+
+    --hover: rgba(255, 255, 255, 0.06);
+    --active: rgba(255, 255, 255, 0.1);
+    --scrim: rgba(0, 0, 0, 0.62);
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --shadow-3: 0 28px 70px rgba(0, 0, 0, 0.6);
+
+    --bar: #000000;
+    --bar-ink: #ffffff;
+  }
+}
+
+/* 用户显式选择主题时覆盖系统偏好 */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}

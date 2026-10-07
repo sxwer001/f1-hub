@@ -1,0 +1,137 @@
+/* 赛历页专属样式（仅 pages/schedule.html 引用） */
+
+/*
+ * 顶部筛选切换分区可见性时，用 [hidden] 把整段分区撤出布局。
+ * UA 样式表本身有 [hidden]{display:none}，这里显式声明是为了不受
+ * 后续任何 .band 显示规则（或组件化覆盖）影响。除此之外不再新增类名。
+ */
+.band[hidden] {
+  display: none;
+}
+
+/* 筛选控件与「刷新数据」并排时的竖向对齐（.seg 自带 margin-left:auto，在这里会挤出容器） */
+.page-head-actions .seg {
+  margin-left: 0;
+}
+
+/* ==========================================================================
+   下一站分区：左列（红卡 + 赛道信息卡） + 右栏（周末时间表 / 正赛日天气）
+   --------------------------------------------------------------------------
+   .cards.cards-featured 在宽屏默认会按 minmax(420px,1fr) 自动铺成多列，
+   这里把它压回单列。赛道信息卡原本挂在右栏，导致左列只有一张红卡、下方留出
+   一大片空白（用户反馈「左右界面有点不均衡」），现改为挂在左列红卡正下方：
+     行 1 = 红卡，行 2 = 赛道信息卡；右栏 .next-side 跨满两行。
+   列宽：左列上限 640px（原来是 540px）。实测（Chromium 1680px，见报告）：
+   左列 540px 时赛道信息卡的 9 格 .stat-row 会折成 3 行、卡片涨到 469px，
+   左列合计 708px；左列 ≥600px 时折成 2 行、卡片 356px，左列合计 594px，
+   与右栏时间表（408px）的差值从 300px 降到 186px。再宽收益为零（统计格
+   已到最少行数），只会白白挤窄会话表。
+   等高：右栏 .next-side 跨满两行 + align-self:stretch，两列底边对齐（否则
+   右栏底边比左列高 186px，看起来像掉了一截）。卡片内容仍顶部对齐，多出来的
+   高度留在卡片内部底部——试过让会话表 flex 吃满该高度，会把「时间已换算到
+   本机时区…」这条注释挤出卡片（它在 .table-scroll 内，无法钉底）并被
+   .card{overflow:hidden} 裁掉，故不采用。
+   单栏回落阈值 1240px（原来是 980px）：两列要同时容纳 640px 左列与 7 列
+   会话表所需的 ≥480px，实测分割线需 ≥1174px（视口 ≈1226px）；低于此宽度
+   强行两列会出现 300px 以上的高度差或表格横向滚动，故整体回落单栏堆叠，
+   按 DOM 顺序：红卡 → 赛道信息 → 时间表。
+   ========================================================================== */
+
+.next-split {
+  display: grid;
+  grid-template-columns: minmax(430px, 640px) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* 左列只有一张红卡：禁止它再自动分列 / 被拉伸 */
+.next-split .cards.cards-featured {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* 显式落位（三项都是 .next-split 的直接子元素，DOM 顺序即窄屏堆叠顺序） */
+.next-split > #cards-next {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.next-split > #next-circuit-host {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+/* 没有下一站时挂载点是空的：撤出布局，避免左列尾部多出一段空白 + 一个 gap */
+.next-split > #next-circuit-host:empty {
+  display: none;
+}
+
+.next-side {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  /* 跨满两行并拉伸到左列高度：两列底边对齐 */
+  align-self: stretch;
+}
+
+.next-panel {
+  min-width: 0;
+}
+
+.next-panel .card-body {
+  min-width: 0;
+}
+
+/* 7 列会话表在窄栏里会撑破卡片，给一层横向滚动兜底（宽屏时用不到） */
+.next-panel .table-scroll {
+  overflow-x: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
+.next-panel .sessions-table {
+  min-width: 480px;
+}
+
+/* 标题行右侧的小注（赛道当地时区）不要被长标题挤到换行 */
+.next-panel .card-caption {
+  white-space: nowrap;
+}
+
+/* 长值（Asia/Singapore 这种没有空格的长词）在窄栏里允许断行，别撑破卡片 */
+.next-panel .stat {
+  min-width: 0;
+}
+
+.next-panel .stat b {
+  overflow-wrap: anywhere;
+}
+
+/*
+ * 中等及窄宽度（≤1240px）：两列放不下「640px 左列 + ≥480px 的 7 列会话表」，
+ * 强行两列实测高度差 >300px（1024px 下左列 811px / 右栏 408px），
+ * 因此整体回落单栏堆叠，按 DOM 顺序：红卡 → 赛道信息 → 时间表。
+ * 980px 及以下同样落在这条规则里。
+ */
+@media (max-width: 1240px) {
+  .next-split {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .next-split > #cards-next,
+  .next-split > #next-circuit-host,
+  .next-split > #next-side {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* 单栏下每项各占一行，不需要也不应该互相拉伸 */
+  .next-side {
+    align-self: auto;
+  }
+}
