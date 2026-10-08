@@ -111,7 +111,7 @@ export async function getAppInfo() {
       /* 回落到默认值 */
     }
   }
-  return { version: '1.0.2', name: 'F1 观赛助手', platform: 'web', titlebarHeight: 0 };
+  return { version: '1.0.3', name: 'F1 观赛助手', platform: 'web', titlebarHeight: 0 };
 }
 
 /* ------------------------------------------------------------------ 窗口控制 */

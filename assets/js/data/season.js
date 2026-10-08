@@ -2,11 +2,11 @@
  * 赛季数据模型。
  *
  * 设计：内置快照（assets/data/season.json）是「基准 + 中文名字典 + 离线回退」，
- * 联网时叠加实时积分榜。分站状态一律在运行时按当前时间重算 ——
+ * 联网时叠加实时积分榜、成绩、排位与进站记录。分站状态按当前时间重算 ——
  * 快照生成后又有比赛结束时，界面必须自己反应过来，不能沿用快照里的旧 status。
  */
 
-import { ENDPOINTS, SEASON_YEAR } from '../config.js';
+import { ENDPOINTS, SEASON_YEAR, CACHE_TTL } from '../config.js';
 import { loadSnapshot, getJson, clearCache } from '../net.js';
 import {
   raceNameZh, circuitZh, countryZh, localityZh, nationalityZh,
@@ -66,7 +66,7 @@ function normalizeSession(raw) {
 
 /** 会话状态：已结束 / 进行中 / 未开始 */
 export function sessionState(session, now = Date.now()) {
-  if (!session?.ts) return 'unknown';
+  if (!Number.isFinite(session?.ts)) return 'unknown';
   const duration = SESSION_DURATION_MS[session.key] ?? 60 * 60 * 1000;
   if (now >= session.ts + duration) return 'done';
   if (now >= session.ts) return 'live';
@@ -78,7 +78,6 @@ function normalizeRace(raw, now) {
     .map(normalizeSession)
     .sort((a, b) => (a.ts ?? Infinity) - (b.ts ?? Infinity));
   const raceSession = sessions.find((s) => s.key === 'race') || null;
-  const raceTs = raceSession?.ts ?? (raw.raceUtc ? Date.parse(raw.raceUtc) : null);
   const lastEndTs = raceEndTs({ sessions, raceUtc: raw.raceUtc });
 
   return {
@@ -238,18 +237,84 @@ function derive(model, now) {
   return model;
 }
 
+/** 拉齐单站某类记录的所有分页；任何一页失败都保留旧数据。 */
+async function fetchRaceRows(season, round, endpoint, field, force) {
+  const rows = [];
+  let offset = 0;
+  for (;;) {
+    const data = await getJson(`${ENDPOINTS.season}/${season}/${round}/${endpoint}.json?limit=100&offset=${offset}`, {
+      force, ttl: CACHE_TTL.raceDetail,
+    });
+    const page = data?.MRData?.RaceTable?.Races?.[0]?.[field] || [];
+    if (!Array.isArray(page)) throw new Error('分站记录结构异常');
+    rows.push(...page);
+    const total = Number(data?.MRData?.total ?? rows.length);
+    if (rows.length >= total) return rows;
+    if (!page.length) throw new Error('分站记录分页不完整');
+    offset += page.length;
+  }
+}
+
+function resultDriver(row) {
+  return {
+    pos: Number(row.position),
+    driverId: row.Driver.driverId,
+    name: `${row.Driver.givenName} ${row.Driver.familyName}`,
+    code: row.Driver.code || '',
+    team: row.Constructor.name,
+    teamColor: teamColor(row.Constructor.name),
+  };
+}
+
+/** 补齐已结束会话，并刷新当前周末、最近完赛站和页面选中的站。 */
+async function refreshRaceData(model, { now, force, rounds }) {
+  const requested = new Set([model.lastCompleted?.round, model.nextRace?.round, ...rounds]);
+  let changed = false;
+  // 新分站优先，避免旧站缺失记录的网络失败阻塞最新成绩。
+  for (const race of [...model.races].reverse()) {
+    const raceDone = race.status === 'completed';
+    const qualiDone = race.sessions.some((s) => s.key === 'qualifying' && sessionState(s, now) === 'done');
+    const selected = requested.has(race.round);
+    const jobs = [];
+    const add = (store, endpoint, field, normalize, eligible) => {
+      if (!eligible || (!selected && model[store][race.round]?.length)) return;
+      jobs.push((async () => {
+        const rows = await fetchRaceRows(model.season, race.round, endpoint, field, force);
+        // 空响应常见于尚未发布或临时不可用；不能清空已拿到的记录。
+        if (!rows.length) return;
+        model[store][race.round] = rows.map(normalize);
+        changed = true;
+      })());
+    };
+    add('results', 'results', 'Results', (r) => ({
+      ...resultDriver(r), grid: Number(r.grid), laps: Number(r.laps),
+      status: /^\+\d+ Laps?$/.test(r.status) ? 'Lapped'
+        : /^(Did not qualify|Did not prequalify)$/.test(r.status) ? 'Did not start' : r.status,
+      points: Number(r.points), time: r.Time?.time || null, fastestLap: String(r.FastestLap?.rank) === '1',
+    }), raceDone);
+    add('pitStops', 'pitstops', 'PitStops', (p) => ({ driverId: p.driverId, lap: Number(p.lap), duration: p.duration }), raceDone);
+    add('qualifying', 'qualifying', 'QualifyingResults', (q) => ({
+      ...resultDriver(q), q1: q.Q1 || null, q2: q.Q2 || null, q3: q.Q3 || null,
+    }), raceDone || qualiDone);
+    const settled = await Promise.allSettled(jobs);
+    // 断网时不逐站重复等待超时；成功的部分仍然可以使用。
+    if (settled.length && settled.every((r) => r.status === 'rejected')) break;
+  }
+  return changed;
+}
+
 /**
- * 用实时积分榜覆盖快照里的名次。失败时返回 null，调用方沿用快照即可。
+ * 更新积分榜与分站记录。全部失败时返回 null，调用方沿用当前数据。
  * @param {{now?: number, force?: boolean}} options force=true 绕过 net.js 的 TTL 直连接口
  * @returns {Promise<object|null>}
  */
-export async function refreshLive(model, { now = Date.now(), force = false } = {}) {
+export async function refreshLive(model, { now = Date.now(), force = false, rounds = [] } = {}) {
+  retime(model, now);
   let live;
   try {
     live = await fetchLiveStandings(force);
   } catch (err) {
     console.warn('[season] 实时积分榜不可用，使用内置快照：', err.message);
-    return null;
   }
 
   const snapshotDrivers = new Map(model.drivers.map((d) => [d.driverId, d]));
@@ -257,13 +322,20 @@ export async function refreshLive(model, { now = Date.now(), force = false } = {
 
   const next = {
     ...model,
-    source: SOURCE.LIVE,
-    loadedAt: new Date(now).toISOString(),
-    standingsRound: live.round,
-    drivers: live.drivers.map((d) => normalizeDriver(d, snapshotDrivers.get(d.driverId))),
-    constructors: live.constructors.map((c) => normalizeConstructor(c, snapshotTeams.get(c.team))),
+    results: { ...model.results },
+    pitStops: { ...model.pitStops },
+    qualifying: { ...model.qualifying },
   };
-  return derive(next, now);
+  if (live) {
+    next.source = SOURCE.LIVE;
+    next.standingsRound = live.round;
+    next.drivers = live.drivers.map((d) => normalizeDriver(d, snapshotDrivers.get(d.driverId)));
+    next.constructors = live.constructors.map((c) => normalizeConstructor(c, snapshotTeams.get(c.team)));
+  }
+  const raceDataChanged = await refreshRaceData(next, { now, force, rounds });
+  if (!live && !raceDataChanged) return null;
+  next.loadedAt = new Date(now).toISOString();
+  return retime(next, now);
 }
 
 /** 分站状态随时间变化时，刷新现有模型（不重新读快照） */

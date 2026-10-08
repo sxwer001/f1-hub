@@ -9,7 +9,7 @@
  */
 
 import { APP_NAME, AUTO_REFRESH_MS } from '../config.js';
-import { loadSeason, refreshLive, raceResults, raceQualifying } from '../data/season.js';
+import { loadSeason, refreshLive, retime, raceResults, raceQualifying } from '../data/season.js';
 import { clearCache } from '../net.js';
 import { circuitTimeZone } from '../data/maps.js';
 import { initSettings, subscribeSettings } from '../store.js';
@@ -96,10 +96,9 @@ function renderBand() {
   const pole = raceQualifying(model, race.round)[0] || null;
   const firstUtc = race.sessions[0]?.utc ?? race.raceUtc;
 
-  // 快照里 status 只有四种取值：Finished / Lapped / Retired / Did not start。
-  // 按官方分类口径，Finished 与 Lapped 都算完赛（被套圈仍被分类），因此两者相加。
+  // 在线记录保留引擎故障、事故、取消资格等原始状态；被套圈记为 Lapped。
   const classified = rows.filter((r) => r.status === 'Finished' || r.status === 'Lapped').length;
-  const retired = rows.filter((r) => r.status === 'Retired').length;
+  const retired = rows.filter((r) => !['Finished', 'Lapped', 'Did not start', 'Disqualified'].includes(r.status)).length;
   // 分母只数真正发过车的：Did not start 既不完赛也不退赛，留在分母里会稀释「完赛 / 发车」
   const started = rows.filter((r) => r.status !== 'Did not start').length;
 
@@ -119,7 +118,7 @@ function renderBand() {
   setHTML(
     byId('round-stats'),
     items.length
-      ? `${statRow(items)}<p class="block-note">完赛口径：官方分类成绩（Finished 与 Lapped 均计为完赛）；数据来自 jolpi.ca 赛季快照。</p>`
+      ? `${statRow(items)}<p class="block-note">完赛口径：官方分类成绩（Finished 与 Lapped 均计为完赛）；数据来自 jolpi.ca，断网时使用已有记录。</p>`
       : emptyBox('该分站暂无统计数据。'),
   );
   setHTML(byId('podium-body'), view.podiumSpotlightHtml({ model, race, base: '../' }));
@@ -172,10 +171,7 @@ function bindEvents() {
 /* ------------------------------------------------------------------ 取数 */
 
 /**
- * 后台刷新：**只**重取实时积分榜，成功才原地重绘。
- *
- * 刻意不再走 loadSeason()：成绩/排位/停站本来就来自快照，重读快照只会把已经切到
- * 实时数据的 state.model 先降级成快照再升回来 —— 表格与状态条会闪一下旧数据。
+ * 后台刷新积分榜与分站记录，保留当前模型作为离线回退。
  * force=true（手动刷新）清掉渲染层缓存，并把 force 一路透到 net.js（主进程那层
  * 5 分钟缓存也靠它绕过）。
  */
@@ -186,7 +182,7 @@ async function refreshData(force = false) {
   const seq = ++refreshSeq; // 让在途的旧刷新 / 启动时的后台补齐作废
   if (force) clearCache();
   try {
-    const live = await refreshLive(state.model, { force });
+    const live = await refreshLive(state.model, { force, rounds: [state.round] });
     if (seq !== refreshSeq) return; // 期间已有更新的刷新 → 丢弃本次结果，不写回不重绘
     if (!live) return; // 取不到实时数据：保留当前模型（可能仍是快照），等下一轮或手动刷新
     state.model = live;
@@ -237,7 +233,7 @@ async function boot() {
   // 5) 实时积分榜后台补齐
   const liveSeq = ++refreshSeq;
   const captured = state.model;
-  refreshLive(captured)
+  refreshLive(captured, { rounds: [state.round] })
     .then((live) => {
       if (!live) return;
       // await 期间用户切了站 / 定时刷新已写入更新的模型 → 丢弃这次结果，不写回不重绘
@@ -250,6 +246,7 @@ async function boot() {
   // 6) 心跳：每秒只更新时钟；每 30 秒才重绘较重区块
   onTick((now) => {
     state.now = now;
+    retime(state.model, now);
     renderClocks(currentRace() || state.model?.lastCompleted, now);
     if (now - state.lastPaint > 30_000) {
       state.lastPaint = now;

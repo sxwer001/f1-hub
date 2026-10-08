@@ -4,7 +4,7 @@
  */
 
 import { APP_NAME, AUTO_REFRESH_MS } from '../config.js';
-import { loadSeason, refreshLive } from '../data/season.js';
+import { loadSeason, refreshLive, retime } from '../data/season.js';
 import { initSettings, favoriteRank } from '../store.js';
 import { onTick } from '../domain/schedule.js';
 import { clearCache } from '../net.js';
@@ -217,6 +217,12 @@ async function boot() {
   // 心跳：每秒更新时钟，每 30 秒才重绘状态栏
   onTick((now) => {
     state.now = now;
+    const previousRace = state.model.nextRace;
+    retime(state.model, now);
+    if (previousRace !== state.model.nextRace) {
+      mountShell({ race: state.model.nextRace || state.model.lastCompleted, model: state.model });
+      renderAll(now);
+    }
     renderClocks(state.model?.nextRace || state.model?.lastCompleted, now);
     if (now - state.lastSlowPaint > 30_000) {
       state.lastSlowPaint = now;

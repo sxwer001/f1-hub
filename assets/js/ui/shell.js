@@ -209,7 +209,11 @@ export function bindShellEvents({ onFavoritesChanged, onRefresh, onStandingsTab 
     const el = event.target;
     if (el.id === 'set-notify') await updateSettings({ notifyEnabled: Boolean(el.checked) });
     else if (el.id === 'set-lead') await updateSettings({ notifyLeadMinutes: Number(el.value) });
-    else if (el.id === 'set-theme') await setTheme(el.value);
+    else if (el.id === 'set-theme') {
+      const theme = el.value;
+      await updateSettings({ theme });
+      await setTheme(theme);
+    }
     else return;
     // 设置变了，面板里的「已记录 N 条提醒」等文案要跟着刷新
     renderSettingsPanel();

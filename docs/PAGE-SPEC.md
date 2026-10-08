@@ -224,8 +224,11 @@ boot();
 ## 验证（必须做，并在报告里贴真实输出）
 
 ```powershell
-# F1_JSDOM_ROOT 指向「含 node_modules\jsdom 的目录」，按自己机器填
-$env:F1_JSDOM_ROOT = '<你的 node 工作区>'
+pnpm install --frozen-lockfile
+pnpm check
+# 自定义脚本默认使用项目内的 jsdom，无需设置 F1_JSDOM_ROOT。
+# 如需使用其他工作区的 jsdom，可选设置：
+# $env:F1_JSDOM_ROOT = '<含 node_modules\jsdom 的目录>'
 node <你的临时冒烟脚本>
 ```
 

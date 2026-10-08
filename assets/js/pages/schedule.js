@@ -6,7 +6,7 @@
  */
 
 import { APP_NAME } from '../config.js';
-import { loadSeason, refreshLive } from '../data/season.js';
+import { loadSeason, refreshLive, retime } from '../data/season.js';
 import { clearCache } from '../net.js';
 import { circuitTimeZone } from '../data/maps.js';
 import { initSettings } from '../store.js';
@@ -356,6 +356,12 @@ async function boot() {
   // 6) 心跳：每秒只走时钟，每 30 秒才重绘较重区块
   onTick((now) => {
     state.now = now;
+    const previousRace = state.model.nextRace;
+    retime(state.model, now);
+    if (previousRace !== state.model.nextRace) {
+      mountShell({ race: state.model.nextRace || state.model.lastCompleted, model: state.model });
+      renderCards(now);
+    }
     renderClocks(state.model?.nextRace || state.model?.lastCompleted, now);
     if (now - state.lastSlowPaint > 30_000) {
       state.lastSlowPaint = now;

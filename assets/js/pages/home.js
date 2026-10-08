@@ -16,7 +16,7 @@
 
 import { AUTO_REFRESH_MS, SEASON_YEAR } from '../config.js';
 import { clearCache } from '../net.js';
-import { loadSeason, refreshLive, sessionState } from '../data/season.js';
+import { loadSeason, refreshLive, sessionState, retime } from '../data/season.js';
 import { getNews } from '../data/news.js';
 import { circuitTimeZone } from '../data/maps.js';
 import { getRaceForecast } from '../data/weather.js';
@@ -25,10 +25,10 @@ import {
   byId, escapeHtml, fmtDateRange, fmtDateTime, fmtZoneDateTime, setHTML, setText, tzLabel,
 } from '../utils.js';
 import { countdownHtml, emptyBox, errorBox, statRow } from '../ui/atoms.js';
-import { countdownOnly, newsHtml, statusBarHtml } from '../ui/dashboard.js';
+import { newsHtml, statusBarHtml } from '../ui/dashboard.js';
 import { sessionsPanelHtml } from '../ui/race.js';
 import { applyTheme, bindShellEvents, initShellChrome, mountShell, navHtml, renderClocks } from '../ui/shell.js';
-import { countdownCells, nextSessionSummary, onTick } from '../domain/schedule.js';
+import { countdownCells, onTick } from '../domain/schedule.js';
 
 const MAX_NEWS = 8;
 
@@ -201,7 +201,7 @@ async function refreshAll(force = false) {
   try {
     if (force) clearCache();
     // force 必须一路透下去：net.js 的渲染层缓存与主进程那层缓存都要绕过
-    const model = await loadSeason({ now: Date.now(), force });
+    const model = state.model ? retime(state.model) : await loadSeason({ now: Date.now(), force });
     if (seq !== refreshSeq) return; // 期间已有更新的刷新 → 丢弃本次结果，不写回不重绘
     state.model = model;
     renderAll();
@@ -291,11 +291,22 @@ async function loadNews() {
 
 function handleTick(now) {
   if (state.model) {
+    const previousRace = currentRace();
+    retime(state.model, now);
+    if (currentRace() !== previousRace) {
+      mountShell({ race: currentRace(), model: state.model });
+      renderAll(now);
+      loadForecast().catch((err) => console.warn('[home] 天气加载异常：', err?.message ?? err));
+    }
     const target = byId('hero-count-target');
     if (target) {
       // 只换倒计时数字，避免整块重绘；结构必须保持 4 个 .cd-cell
-      const next = countdownOnly(nextSessionSummary(state.model, now), now);
-      target.innerHTML = next || countdownHtml(countdownCells(0));
+      const session = currentRace()?.sessions.find((s) => sessionState(s, now) !== 'done');
+      const key = session ? `${currentRace().round}:${session.key}:${sessionState(session, now)}` : '';
+      if (target.dataset.session !== key) renderCountdown(now);
+      const cells = byId('hero-count-target');
+      cells.dataset.session = key;
+      cells.innerHTML = countdownHtml(countdownCells(session?.ts ? Math.max(0, session.ts - now) : 0));
     }
     renderClocks(currentRace(), now);
   }
@@ -353,14 +364,11 @@ async function boot() {
   cleanups.push(onTick(handleTick));
 
   // 自动刷新（refreshAll 内部含天气重取）
-  cleanups.push(() =>
-    clearInterval(
-      setInterval(() => {
-        refreshAll(false).catch((err) => console.warn('[home] 自动刷新异常：', err?.message ?? err));
-        loadNews().catch((err) => console.warn('[home] 新闻加载异常：', err?.message ?? err));
-      }, AUTO_REFRESH_MS),
-    ),
-  );
+  const refreshTimer = setInterval(() => {
+    refreshAll(false).catch((err) => console.warn('[home] 自动刷新异常：', err?.message ?? err));
+    loadNews().catch((err) => console.warn('[home] 新闻加载异常：', err?.message ?? err));
+  }, AUTO_REFRESH_MS);
+  cleanups.push(() => clearInterval(refreshTimer));
 
   window.addEventListener('beforeunload', teardown);
 }

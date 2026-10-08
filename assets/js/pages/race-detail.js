@@ -4,22 +4,21 @@
  */
 
 import { APP_NAME, AUTO_REFRESH_MS } from '../config.js';
-import { loadSeason } from '../data/season.js';
+import { loadSeason, refreshLive, retime } from '../data/season.js';
+import { clearCache } from '../net.js';
 import { getRaceForecast } from '../data/weather.js';
-import { initSettings, subscribeSettings, getSettingsSnapshot, favoriteDrivers, favoriteTeams } from '../store.js';
+import { initSettings, subscribeSettings } from '../store.js';
 import { onTick } from '../domain/schedule.js';
-import { getAppInfo, openExternal, windowControls, isDesktop } from '../platform.js';
 import { byId, setHTML, toInt } from '../utils.js';
 import { skeleton, errorBox, emptyBox } from '../ui/atoms.js';
-import { renderSubbar, renderClocks, setDataSource } from '../ui/shell.js';
+import {
+  mountShell, renderClocks, applyTheme, initShellChrome, bindShellEvents, favoritesSnapshot,
+} from '../ui/shell.js';
 import * as view from '../ui/race.js';
 
 const state = { model: null, race: null, forecast: null, forecastRaceId: null, lastPaint: 0 };
 
-const favoritesSnapshot = () => ({
-  drivers: favoriteDrivers(),
-  teams: favoriteTeams(),
-});
+let refreshing = false;
 
 function resolveRound(params, model) {
   const raw = params.get('round');
@@ -48,9 +47,7 @@ function render() {
 
   // 黑次栏 / 双时钟 / 数据源徽标一律复用共享外壳（ui/shell.js），
   // 页面之间只有这一份实现，不会再各自漂移
-  renderSubbar(race);
-  setDataSource(model);
-  renderClocks(race, now);
+  mountShell({ race, model });
 }
 
 /**
@@ -68,38 +65,28 @@ async function loadForecast(target = state.race) {
 }
 
 /**
- * 后台刷新：重读快照推进分站状态，**并把当前站的天气一起重取**。
- * 只放在启动时取一次的话，页面挂着不关就永远显示几小时前的预报。
+ * 后台更新积分榜、分站记录与天气，失败保留当前模型。
  * @returns {Promise<boolean>} 是否刷新成功（当前站仍在快照里）
  */
 async function refreshAll({ force = false } = {}) {
-  const model = await loadSeason({ now: Date.now(), force });
-  // 取不到就保持原状：把 state.race 赋成 undefined 会让下一次 tick 读 state.race.round 抛
-  // TypeError，自动刷新会就此永久失效
-  const next = state.race ? model.byRound.get(state.race.round) : null;
-  if (!next) return false;
-  state.model = model;
-  state.race = next;
-  render();
-  // 模型写回之后再取天气；内部自带「目标站是否仍是当前站」校验，失败只 warn
-  loadForecast(next).catch((err) => console.warn('[race] 天气不可用：', err.message));
-  return true;
-}
-
-function bindEvents() {
-  if (windowControls.available) {
-    byId('win-min')?.addEventListener('click', () => windowControls.minimize());
-    byId('win-max')?.addEventListener('click', () => windowControls.toggleMaximize());
-    byId('win-close')?.addEventListener('click', () => windowControls.close());
+  if (refreshing || !state.model || !state.race) return false;
+  refreshing = true;
+  const model = state.model;
+  const round = state.race.round;
+  try {
+    if (force) clearCache();
+    retime(model);
+    render();
+    loadForecast().catch((err) => console.warn('[race] 天气不可用：', err.message));
+    const live = await refreshLive(model, { force, rounds: [round] });
+    if (!live || state.model !== model) return false;
+    state.model = live;
+    state.race = live.byRound.get(round);
+    render();
+    return true;
+  } finally {
+    refreshing = false;
   }
-
-  document.addEventListener('click', async (event) => {
-    const external = event.target.closest('[data-external]');
-    if (!external) return;
-    event.preventDefault();
-    const url = external.getAttribute('href');
-    if (url) await openExternal(url);
-  });
 }
 
 async function boot() {
@@ -111,12 +98,12 @@ async function boot() {
   setHTML(byId('winners-body'), skeleton());
 
   await initSettings();
-  const info = await getAppInfo();
-  document.documentElement.style.setProperty('--titlebar-h', `${info.titlebarHeight || 44}px`);
-  document.body.classList.toggle('is-desktop', isDesktop);
-  document.documentElement.dataset.theme = getSettingsSnapshot().theme || 'light';
-
-  bindEvents();
+  applyTheme();
+  await initShellChrome();
+  bindShellEvents({
+    onFavoritesChanged: () => render(),
+    onRefresh: () => refreshAll({ force: true }).catch((err) => console.warn('[race] 刷新失败：', err.message)),
+  });
 
   try {
     state.model = await loadSeason({});
@@ -138,12 +125,12 @@ async function boot() {
 
   render();
 
-  // 首次天气：失败只 warn，不阻塞已经渲染好的页面
-  loadForecast(state.race).catch((err) => console.warn('[race] 天气不可用：', err.message));
+  refreshAll().catch((err) => console.warn('[race] 刷新失败：', err.message));
 
-  onTick(() => {
+  onTick((now) => {
     // 会话状态与倒计时随心跳更新（每 30 秒才真正重绘一次，避免闪烁）
-    const now = Date.now();
+    retime(state.model, now);
+    renderClocks(state.race, now);
     if (now - (state.lastPaint || 0) < 30_000) return;
     state.lastPaint = now;
     render();
